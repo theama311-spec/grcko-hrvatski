@@ -55,11 +55,13 @@ function showEntry(id){
   const e=entries.find(x=>x.id===id); if(!e)return;
   selectedId=id; welcome.classList.add("hidden"); editor.classList.add("hidden"); view.classList.remove("hidden");
   view.innerHTML=`
+    <button class="mobile-back" id="backToList">← Natrag na natuknice</button>
     <div class="entry-meta">Natuknica</div>
     <h1 class="entry-title">${esc(e.lemma)}</h1>
     <div class="entry-body">${esc(e.text)}</div>
     <div class="entry-tools"><button id="editBtn">Uredi</button></div>`;
   $("editBtn").onclick=()=>openEditor(id);
+  $("backToList").onclick=()=>{ view.classList.add("hidden"); selectedId=null; renderList(); };
   renderList();
 }
 function openEditor(id=null){
