@@ -20,8 +20,23 @@ function save(){
   localStorage.setItem(KEY, JSON.stringify(entries));
 }
 function norm(s){return (s||"").normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").toLowerCase()}
+function greekBase(s){
+  return (s||"")
+    .normalize("NFD")
+    .replace(/[\\u0300-\\u036f\\u1ab0-\\u1aff\\u1dc0-\\u1dff\\u0483-\\u0489]/g,"")
+    .replace(/[\\u0313\\u0314\\u0342\\u0343\\u0344\\u0345]/g,"")
+    .toLowerCase();
+}
 function firstLetter(s){
-  const n=norm(s); const m=n.match(/[a-zα-ω]/); return m?m[0].toUpperCase():"#";
+  const n=greekBase(s).trim();
+  if(!n) return "#";
+  const ch=n[0];
+  const map={
+    "α":"Α","β":"Β","γ":"Γ","δ":"Δ","ε":"Ε","ζ":"Ζ","η":"Η","θ":"Θ",
+    "ι":"Ι","κ":"Κ","λ":"Λ","μ":"Μ","ν":"Ν","ξ":"Ξ","ο":"Ο","π":"Π",
+    "ρ":"Ρ","σ":"Σ","ς":"Σ","τ":"Τ","υ":"Υ","φ":"Φ","χ":"Χ","ψ":"Ψ","ω":"Ω"
+  };
+  return map[ch] || ch.toUpperCase();
 }
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 
@@ -36,10 +51,19 @@ function filtered(){
   });
 }
 function renderLetters(){
-  const set=[...new Set(entries.map(e=>firstLetter(e.lemma)))];
+  const greekAlphabet=["Α","Β","Γ","Δ","Ε","Ζ","Η","Θ","Ι","Κ","Λ","Μ","Ν","Ξ","Ο","Π","Ρ","Σ","Τ","Υ","Φ","Χ","Ψ","Ω"];
   lettersEl.innerHTML=`<button data-letter="" class="${!currentLetter?'active':''}">SVE</button>`+
-    set.map(l=>`<button data-letter="${esc(l)}" class="${currentLetter===l?'active':''}">${esc(l)}</button>`).join("");
-  lettersEl.querySelectorAll("button").forEach(b=>b.onclick=()=>{currentLetter=b.dataset.letter;renderAll()});
+    greekAlphabet.map(l=>`<button data-letter="${esc(l)}" class="${currentLetter===l?'active':''}">${esc(l)}</button>`).join("");
+  lettersEl.querySelectorAll("button").forEach(b=>b.onclick=()=>{
+    currentLetter=b.dataset.letter;
+    renderAll();
+    if(currentLetter){
+      requestAnimationFrame(()=>{
+        const first=listEl.querySelector(".entry-row");
+        if(first) first.scrollIntoView({behavior:"smooth",block:"start"});
+      });
+    }
+  });
 }
 function renderList(){
   const list=filtered();
@@ -51,6 +75,8 @@ function renderList(){
     </div>`).join("");
   listEl.querySelectorAll(".entry-row").forEach(r=>r.onclick=()=>showEntry(Number(r.dataset.id)));
 }
+function renderAll(){ renderLetters(); renderList(); }
+
 function showEntry(id){
   const e=entries.find(x=>x.id===id); if(!e)return;
   selectedId=id; welcome.classList.add("hidden"); editor.classList.add("hidden"); view.classList.remove("hidden");
