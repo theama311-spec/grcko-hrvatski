@@ -74,3 +74,8 @@ button{cursor:pointer}
   .mobile-back{display:block!important;margin:0 0 18px;padding:8px 11px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--text)}
 }
 @media(min-width:801px){.mobile-back{display:none!important}}
+
+.publish-btn{font-weight:600}
+@media(max-width:800px){
+  .actions{grid-template-columns:repeat(3,1fr)}
+}

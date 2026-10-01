@@ -16,6 +16,7 @@
     <button id="newEntry">+ Nova</button>
     <button id="importBtn">Uvezi</button>
     <button id="exportBtn">Izvezi</button>
+    <button id="publishBtn" class="publish-btn">Objavi</button>
     <button id="themeBtn" title="Promijeni temu">Tema</button>
     <input id="fileInput" type="file" accept=".json" hidden>
   </div>
@@ -62,7 +63,8 @@
         <button id="saveEntry" class="primary">Spremi</button>
         <button id="deleteEntry" class="danger">Obriši</button>
       </div>
-      <p class="note">Izmjene se spremaju u preglednik ovog računala. Za trajnu sigurnosnu kopiju upotrijebite „Izvezi“.</p>
+      <p class="note"><strong id="saveStatus">Promjene se spremaju na ovom uređaju.</strong><br>
+Za sigurnosnu kopiju povremeno odaberite „Izvezi“. Izvoz spremite na sigurno mjesto.</p>
     </section>
   </main>
 </div>
