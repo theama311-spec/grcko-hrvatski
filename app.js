@@ -16,13 +16,8 @@ function loadEntries(){
   } catch(e) {}
   return SOURCE.map(x=>({...x}));
 }
-function setSaveStatus(message){
-  const el=$("saveStatus");
-  if(el) el.textContent=message;
-}
 function save(){
   localStorage.setItem(KEY, JSON.stringify(entries));
-  setSaveStatus("✓ Promjene spremljene na ovom uređaju.");
 }
 function norm(s){return (s||"").normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").toLowerCase()}
 function greekBase(s){
@@ -96,7 +91,6 @@ function showEntry(id){
   renderList();
 }
 function openEditor(id=null){
-  setSaveStatus("Uređivanje: promjene će se spremiti kad kliknete „Spremi“.");
   editor.classList.remove("hidden"); view.classList.add("hidden"); welcome.classList.add("hidden");
   const e=id?entries.find(x=>x.id===id):null;
   $("editorTitle").textContent=e?"Uredi natuknicu":"Nova natuknica";
@@ -124,8 +118,7 @@ function saveEditor(){
 }
 function deleteEditor(){
   const id=Number(editor.dataset.id); if(!id)return;
-  const entry=entries.find(x=>x.id===id);
-  if(!confirm(`Obrisati natuknicu „${entry?.lemma||""}“? Ova radnja se može vratiti samo ako imate izvezeni sigurnosni primjerak.`))return;
+  if(!confirm("Obrisati ovu natuknicu?"))return;
   entries=entries.filter(x=>x.id!==id); save(); selectedId=null;
   editor.classList.add("hidden"); view.classList.add("hidden"); welcome.classList.remove("hidden");
   renderLetters(); renderList();
@@ -137,27 +130,10 @@ $("deleteEntry").onclick=deleteEditor;
 search.oninput=renderList;
 searchMode.onchange=renderList;
 $("clearSearch").onclick=()=>{search.value="";renderList();search.focus()};
-function exportDictionary(){
+$("exportBtn").onclick=()=>{
   const blob=new Blob([JSON.stringify(entries,null,2)],{type:"application/json"});
-  const a=document.createElement("a");
-  a.href=URL.createObjectURL(blob);
-  a.download="rjecnik.json";
-  a.click();
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="grcko-hrvatski-rjecnik.json"; a.click();
   setTimeout(()=>URL.revokeObjectURL(a.href),500);
-}
-$("exportBtn").onclick=exportDictionary;
-$("publishBtn").onclick=()=>{
-  exportDictionary();
-  setSaveStatus("✓ Datoteka rjecnik.json pripremljena za objavu.");
-  alert(
-    "Datoteka rjecnik.json je preuzeta.\n\n" +
-    "Da bi se promjene pojavile na javnom rječniku:\n" +
-    "1. Otvorite GitHub repository.\n" +
-    "2. Otvorite mapu data.\n" +
-    "3. Odaberite rjecnik.json i učitajte novu datoteku na njegovo mjesto.\n" +
-    "4. Potvrdite Commit changes.\n\n" +
-    "Ostale datoteke ne treba mijenjati."
-  );
 };
 $("importBtn").onclick=()=>$("fileInput").click();
 $("fileInput").onchange=async e=>{
@@ -167,35 +143,10 @@ $("fileInput").onchange=async e=>{
     if(!Array.isArray(imported))throw Error();
     entries=imported.map((x,i)=>({id:x.id??i+1,lemma:String(x.lemma??""),text:String(x.text??"")}));
     save(); selectedId=null; renderLetters(); renderList();
-    setSaveStatus("✓ Uvezeni rječnik spremljen na ovom uređaju.");
     alert("Rječnik je uvezen.");
   }catch(err){alert("Datoteka nije valjani JSON rječnik.")}
   e.target.value="";
 };
 $("themeBtn").onclick=()=>document.body.classList.toggle("dark");
 
-async function loadPublicDictionary(){
-  if(location.protocol !== "http:" && location.protocol !== "https:"){
-    renderLetters(); renderList();
-    return;
-  }
-  try{
-    const response = await fetch("rjecnik.json?v=" + Date.now(), {cache:"no-store"});
-    if(!response.ok) throw new Error("HTTP " + response.status);
-    const imported = await response.json();
-    if(!Array.isArray(imported)) throw new Error("Invalid dictionary");
-    entries = imported.map((x,i)=>({
-      id:x.id ?? i+1,
-      lemma:String(x.lemma ?? ""),
-      text:String(x.text ?? "")
-    }));
-    selectedId = null;
-    renderLetters();
-    renderList();
-  }catch(err){
-    // If the published JSON cannot be reached, keep the embedded dictionary.
-    renderLetters();
-    renderList();
-  }
-}
-loadPublicDictionary();
+renderLetters(); renderList();
