@@ -90,6 +90,14 @@ function showEntry(id){
   $("editBtn").onclick=()=>openEditor(id);
   $("backToList").onclick=()=>{ view.classList.add("hidden"); selectedId=null; renderList(); };
   renderList();
+
+  // Nakon odabira natuknice na mobitelu automatski prikaži otvoreni zapis.
+  // Na računalu sadržaj ostaje u desnom stupcu pa nema potrebe za pomicanjem.
+  requestAnimationFrame(()=>{
+    if(window.matchMedia("(max-width: 800px)").matches){
+      view.scrollIntoView({behavior:"smooth", block:"start"});
+    }
+  });
 }
 function openEditor(id=null){
   setSaveStatus("Uređivanje: promjene će se spremiti kad kliknete „Spremi“.");
